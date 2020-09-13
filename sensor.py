@@ -8,7 +8,7 @@ from homeassistant.const import (
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_TEMPERATURE,
     ENERGY_KILO_WATT_HOUR,
-    PERCENTAGE,
+    # PERCENTAGE,
     POWER_WATT,
     TEMP_CELSIUS,
 )
@@ -49,7 +49,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     )
     async_add_entities(
         [
-            NatureRemoSensor(coordinator, device, "humidity", PERCENTAGE, DEVICE_CLASS_HUMIDITY, "hu")
+            NatureRemoSensor(coordinator, device, "humidity", "%", DEVICE_CLASS_HUMIDITY, "hu")
             for device in devices
             if "newest_events" in device
         ]
