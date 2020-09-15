@@ -41,8 +41,7 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
     def __init__(self, coordinator, api, appliance, config):
         super().__init__(coordinator, appliance)
         self._api = api
-        self._is_on = None
-        self._brightness = None
+        self._last_button = None
         self._buttons = appliance["light"]["buttons"]
         self._update(appliance["light"]["state"])
 
@@ -53,11 +52,18 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
 
     @property
     def is_on(self):
-        return self._is_on
+        return self._last_button != "onoff"
 
     @property
     def brightness(self):
-        return self._brightness
+        if self._last_button == "onoff":
+            return 0
+        elif self._last_button == "on-100":
+            return 255
+        elif self._last_button == "night":
+            return 1
+        else:
+            return 125
 
     @property
     def white_value(self):
@@ -65,13 +71,31 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn device on."""
-        await self._post_name([
-            "on",
-            "onoff",
-        ])
+        if "brightness" in kwargs:
+            brightness = kwargs["brightness"]
+            if brightness < 20:
+                await self._post_name(["night"])
+            elif brightness == 255:
+                await self._post_name(["on-100"])
+            elif brightness < 125:
+                await self._post_name(["bright-down"])
+            elif brightness >= 125:
+                await self._post_name(["bright-up"])
+        elif "white_value" in kwargs:
+            white_value = kwargs["white_value"]
+            if white_value < 125:
+                await self._post_name(["colortemp-down"])
+            elif white_value >= 125:
+                await self._post_name(["colortemp-up"])
+        else:
+            await self._post_name([
+                "on",
+                "onoff",
+            ])
 
     async def async_turn_off(self, **kwargs):
         """Turn device off."""
+        _LOGGER.debug(kwargs)
         await self._post_name([
             "off",
             "onoff",
@@ -79,8 +103,7 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
 
     def _update(self, state, device=None):
         # hold this to determin the ac mode while it's turned-off
-        self._is_on = state["power"] == "on"
-        self._brightness = int(state["brightness"]) or None
+        self._last_button = state["last_button"] or None
 
     async def _post_name(self, names):
         all = [x.get("name") for x in self._buttons]
