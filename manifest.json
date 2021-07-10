@@ -1,6 +1,7 @@
 {
   "domain": "nature_remo",
   "name": "Nature Remo",
+  "version": "1.0",
   "documentation": "https://github.com/yutoyazaki/hass-nature-remo",
   "codeowners": [
     "@yutoyazaki"

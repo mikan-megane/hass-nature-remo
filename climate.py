@@ -242,4 +242,4 @@ class NatureRemoAC(NatureRemoBase, ClimateEntity):
 
     def _current_mode_temp_range(self):
         temp_range = self._modes[self._remo_mode]["temp"]
-        return list(map(int, filter(None, temp_range)))
+        return list(map(float, filter(None, temp_range)))
