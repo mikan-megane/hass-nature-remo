@@ -4,13 +4,8 @@ import logging
 from homeassistant.core import callback
 from homeassistant.components.light import (
     LightEntity,
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_COLOR_TEMP,
-    SUPPORT_EFFECT,
-    SUPPORT_FLASH,
-    SUPPORT_COLOR,
-    SUPPORT_TRANSITION,
-    SUPPORT_WHITE_VALUE,
+    COLOR_MODE_BRIGHTNESS,
+    COLOR_MODE_COLOR_TEMP,
 )
 from . import DOMAIN, NatureRemoBase
 
@@ -46,9 +41,9 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
         self._update(appliance["light"]["state"])
 
     @property
-    def supported_features(self):
+    def supported_color_modes(self):
         # TODO:明るさと白さの操作受付
-        return SUPPORT_BRIGHTNESS | SUPPORT_WHITE_VALUE
+        return set([COLOR_MODE_BRIGHTNESS, COLOR_MODE_COLOR_TEMP])
 
     @property
     def is_on(self):
@@ -66,11 +61,12 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
             return 125
 
     @property
-    def white_value(self):
-        return 125
+    def color_temp(self):
+        return 320
 
     async def async_turn_on(self, **kwargs):
         """Turn device on."""
+        _LOGGER.debug(kwargs)
         if "brightness" in kwargs:
             brightness = kwargs["brightness"]
             if brightness < 20:
@@ -81,12 +77,12 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
                 await self._post_name(["bright-down"])
             elif brightness >= 125:
                 await self._post_name(["bright-up"])
-        elif "white_value" in kwargs:
-            white_value = kwargs["white_value"]
-            if white_value < 125:
-                await self._post_name(["colortemp-down"])
-            elif white_value >= 125:
+        elif "color_temp" in kwargs:
+            color_temp = kwargs["color_temp"]
+            if color_temp < 320:
                 await self._post_name(["colortemp-up"])
+            elif color_temp >= 320:
+                await self._post_name(["colortemp-down"])
         else:
             await self._post_name([
                 "on",
@@ -96,10 +92,11 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
     async def async_turn_off(self, **kwargs):
         """Turn device off."""
         _LOGGER.debug(kwargs)
-        await self._post_name([
-            "off",
-            "onoff",
-        ])
+        if self.is_on:
+            await self._post_name([
+                "off",
+                "onoff",
+            ])
 
     def _update(self, state, device=None):
         # hold this to determin the ac mode while it's turned-off
