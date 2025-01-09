@@ -4,7 +4,6 @@ import logging
 
 from homeassistant.components.light import LightEntity
 from homeassistant.components.light.const import ColorMode
-from homeassistant.core import callback
 
 from . import DOMAIN, NatureRemoBase
 
@@ -40,9 +39,13 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
         self._update(appliance["light"]["state"])
 
     @property
+    def color_mode(self):
+        return ColorMode.COLOR_TEMP
+
+    @property
     def supported_color_modes(self):
         # TODO:明るさと白さの操作受付
-        return set([ColorMode.BRIGHTNESS, ColorMode.COLOR_TEMP])
+        return set([ColorMode.COLOR_TEMP])
 
     @property
     def is_on(self):
