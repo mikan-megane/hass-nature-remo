@@ -1,44 +1,43 @@
 """Support for Nature Remo AC."""
+
 import logging
 
-from homeassistant.core import callback
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
     DEFAULT_MAX_TEMP,
     DEFAULT_MIN_TEMP,
-    HVAC_MODE_AUTO,
-    HVAC_MODE_COOL,
-    HVAC_MODE_DRY,
-    HVAC_MODE_FAN_ONLY,
-    HVAC_MODE_HEAT,
-    HVAC_MODE_OFF,
-    SUPPORT_FAN_MODE,
-    SUPPORT_SWING_MODE,
-    SUPPORT_TARGET_TEMPERATURE,
+    ClimateEntityFeature,
+    HVACMode,
 )
-from homeassistant.const import ATTR_TEMPERATURE, TEMP_CELSIUS
-from . import DOMAIN, CONF_COOL_TEMP, CONF_HEAT_TEMP, NatureRemoBase
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
+from homeassistant.core import callback
+
+from . import CONF_COOL_TEMP, CONF_HEAT_TEMP, DOMAIN, NatureRemoBase
 
 _LOGGER = logging.getLogger(__name__)
 
-SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE | SUPPORT_SWING_MODE
+SUPPORT_FLAGS = SUPPORT_FLAGS = (
+    ClimateEntityFeature.TARGET_TEMPERATURE
+    | ClimateEntityFeature.FAN_MODE
+    | ClimateEntityFeature.SWING_MODE
+)
 
 MODE_HA_TO_REMO = {
-    HVAC_MODE_AUTO: "auto",
-    HVAC_MODE_FAN_ONLY: "blow",
-    HVAC_MODE_COOL: "cool",
-    HVAC_MODE_DRY: "dry",
-    HVAC_MODE_HEAT: "warm",
-    HVAC_MODE_OFF: "power-off",
+    HVACMode.AUTO: "auto",
+    HVACMode.FAN_ONLY: "blow",
+    HVACMode.COOL: "cool",
+    HVACMode.DRY: "dry",
+    HVACMode.HEAT: "warm",
+    HVACMode.OFF: "power-off",
 }
 
 MODE_REMO_TO_HA = {
-    "auto": HVAC_MODE_AUTO,
-    "blow": HVAC_MODE_FAN_ONLY,
-    "cool": HVAC_MODE_COOL,
-    "dry": HVAC_MODE_DRY,
-    "warm": HVAC_MODE_HEAT,
-    "power-off": HVAC_MODE_OFF,
+    "auto": HVACMode.AUTO,
+    "blow": HVACMode.FAN_ONLY,
+    "cool": HVACMode.COOL,
+    "dry": HVACMode.DRY,
+    "warm": HVACMode.HEAT,
+    "power-off": HVACMode.OFF,
 }
 
 
@@ -67,8 +66,8 @@ class NatureRemoAC(NatureRemoBase, ClimateEntity):
         super().__init__(coordinator, appliance)
         self._api = api
         self._default_temp = {
-            HVAC_MODE_COOL: config[CONF_COOL_TEMP],
-            HVAC_MODE_HEAT: config[CONF_HEAT_TEMP],
+            HVACMode.COOL: config[CONF_COOL_TEMP],
+            HVACMode.HEAT: config[CONF_HEAT_TEMP],
         }
         self._modes = appliance["aircon"]["range"]["modes"]
         self._hvac_mode = None
@@ -93,7 +92,7 @@ class NatureRemoAC(NatureRemoBase, ClimateEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measurement which this thermostat uses."""
-        return TEMP_CELSIUS
+        return UnitOfTemperature.CELSIUS
 
     @property
     def min_temp(self):
@@ -172,7 +171,7 @@ class NatureRemoAC(NatureRemoBase, ClimateEntity):
         """Set new target hvac mode."""
         _LOGGER.debug("Set hvac mode: %s", hvac_mode)
         mode = MODE_HA_TO_REMO[hvac_mode]
-        if mode == MODE_HA_TO_REMO[HVAC_MODE_OFF]:
+        if mode == MODE_HA_TO_REMO[HVACMode.OFF]:
             await self._post({"button": mode})
         else:
             data = {"operation_mode": mode}
@@ -214,8 +213,8 @@ class NatureRemoAC(NatureRemoBase, ClimateEntity):
         except:
             self._target_temperature = None
 
-        if ac_settings["button"] == MODE_HA_TO_REMO[HVAC_MODE_OFF]:
-            self._hvac_mode = HVAC_MODE_OFF
+        if ac_settings["button"] == MODE_HA_TO_REMO[HVACMode.OFF]:
+            self._hvac_mode = HVACMode.OFF
         else:
             self._hvac_mode = MODE_REMO_TO_HA[self._remo_mode]
 

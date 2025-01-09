@@ -1,10 +1,10 @@
 """Support for Nature Remo Switch."""
+
 import logging
 
+from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import callback
-from homeassistant.components.switch import (
-    SwitchEntity,
-)
+
 from . import DOMAIN, NatureRemoBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,17 +43,21 @@ class NatureRemoSwitch(NatureRemoBase, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn device on."""
-        await self._post_icon([
-            "ico_on",
-        ])
+        await self._post_icon(
+            [
+                "ico_on",
+            ]
+        )
         self._is_on = True
 
     async def async_turn_off(self, **kwargs):
         """Turn device off."""
-        await self._post_icon([
-            "ico_off",
-            "ico_on",
-        ])
+        await self._post_icon(
+            [
+                "ico_off",
+                "ico_on",
+            ]
+        )
         self._is_on = False
 
     async def _post_icon(self, names):
@@ -64,6 +68,4 @@ class NatureRemoSwitch(NatureRemoBase, SwitchEntity):
                 break
 
     async def _post(self, signal):
-        response = await self._api.post(
-            f"/signals/{signal}/send", {}
-        )
+        response = await self._api.post(f"/signals/{signal}/send", {})

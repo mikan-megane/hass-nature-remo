@@ -1,12 +1,11 @@
 """Support for Nature Remo Light."""
+
 import logging
 
+from homeassistant.components.light import LightEntity
+from homeassistant.components.light.const import ColorMode
 from homeassistant.core import callback
-from homeassistant.components.light import (
-    LightEntity,
-    COLOR_MODE_BRIGHTNESS,
-    COLOR_MODE_COLOR_TEMP,
-)
+
 from . import DOMAIN, NatureRemoBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
     @property
     def supported_color_modes(self):
         # TODO:明るさと白さの操作受付
-        return set([COLOR_MODE_BRIGHTNESS, COLOR_MODE_COLOR_TEMP])
+        return set([ColorMode.BRIGHTNESS, ColorMode.COLOR_TEMP])
 
     @property
     def is_on(self):
@@ -84,19 +83,23 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
             elif color_temp >= 320:
                 await self._post_name(["colortemp-down"])
         else:
-            await self._post_name([
-                "on",
-                "onoff",
-            ])
+            await self._post_name(
+                [
+                    "on",
+                    "onoff",
+                ]
+            )
 
     async def async_turn_off(self, **kwargs):
         """Turn device off."""
         _LOGGER.debug(kwargs)
         if self.is_on:
-            await self._post_name([
-                "off",
-                "onoff",
-            ])
+            await self._post_name(
+                [
+                    "off",
+                    "onoff",
+                ]
+            )
 
     def _update(self, state, device=None):
         # hold this to determin the ac mode while it's turned-off
@@ -110,8 +113,6 @@ class NatureRemoLight(NatureRemoBase, LightEntity):
                 break
 
     async def _post(self, data):
-        response = await self._api.post(
-            f"/appliances/{self._appliance_id}/light", data
-        )
+        response = await self._api.post(f"/appliances/{self._appliance_id}/light", data)
         self._update(response)
         self.async_write_ha_state()

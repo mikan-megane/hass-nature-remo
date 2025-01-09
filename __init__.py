@@ -1,13 +1,15 @@
 """The Nature Remo integration."""
-import logging
-import voluptuous as vol
 
 from datetime import timedelta
+import logging
+
+import voluptuous as vol
+
+from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.helpers import config_validation as cv, discovery
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.entity import Entity
-from homeassistant.const import CONF_ACCESS_TOKEN
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 _RESOURCE = "https://api.nature.global/1/"

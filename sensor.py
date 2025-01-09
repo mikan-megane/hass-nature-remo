@@ -1,18 +1,11 @@
 """Support for Nature Remo E energy sensor."""
+
 import logging
 
-from homeassistant.const import (
-    CONF_ACCESS_TOKEN,
-    DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_ILLUMINANCE,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_TEMPERATURE,
-    ENERGY_KILO_WATT_HOUR,
-    # PERCENTAGE,
-    POWER_WATT,
-    TEMP_CELSIUS,
-)
+from homeassistant.components.sensor.const import SensorDeviceClass
+from homeassistant.const import UnitOfPower, UnitOfTemperature
 from homeassistant.helpers.entity import Entity
+
 from . import DOMAIN, NatureRemoBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,21 +28,37 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     )
     async_add_entities(
         [
-            NatureRemoSensor(coordinator, device, "illuminate", "lm", DEVICE_CLASS_ILLUMINANCE, "il")
+            NatureRemoSensor(
+                coordinator,
+                device,
+                "illuminate",
+                "lm",
+                SensorDeviceClass.ILLUMINANCE,
+                "il",
+            )
             for device in devices
             if "newest_events" in device
         ]
     )
     async_add_entities(
         [
-            NatureRemoSensor(coordinator, device, "temperature", TEMP_CELSIUS, DEVICE_CLASS_TEMPERATURE, "te")
+            NatureRemoSensor(
+                coordinator,
+                device,
+                "temperature",
+                UnitOfTemperature.CELSIUS,
+                SensorDeviceClass.TEMPERATURE,
+                "te",
+            )
             for device in devices
             if "newest_events" in device
         ]
     )
     async_add_entities(
         [
-            NatureRemoSensor(coordinator, device, "humidity", "%", DEVICE_CLASS_HUMIDITY, "hu")
+            NatureRemoSensor(
+                coordinator, device, "humidity", "%", SensorDeviceClass.HUMIDITY, "hu"
+            )
             for device in devices
             if "newest_events" in device
         ]
@@ -61,7 +70,7 @@ class NatureRemoE(NatureRemoBase):
 
     def __init__(self, coordinator, appliance):
         super().__init__(coordinator, appliance)
-        self._unit_of_measurement = POWER_WATT
+        self._unit_of_measurement = UnitOfPower.WATT
 
     @property
     def state(self):
@@ -83,7 +92,7 @@ class NatureRemoE(NatureRemoBase):
     @property
     def device_class(self):
         """Return the device class."""
-        return DEVICE_CLASS_POWER
+        return SensorDeviceClass.POWER
 
     async def async_added_to_hass(self):
         """Subscribe to updates."""
@@ -101,6 +110,7 @@ class NatureRemoE(NatureRemoBase):
 
 class NatureRemoSensor(Entity):
     """Implementation of a Nature Remo E sensor."""
+
     # TODO:何故か登録されない件
 
     def __init__(self, coordinator, device, type_name, unit, device_class, type_id):
