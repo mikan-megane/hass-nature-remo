@@ -23,7 +23,7 @@ SUPPORT_FLAGS = SUPPORT_FLAGS = (
 )
 
 MODE_HA_TO_REMO = {
-    HVACMode.AUTO: "auto",
+    # HVACMode.AUTO: "auto",
     HVACMode.FAN_ONLY: "blow",
     HVACMode.COOL: "cool",
     HVACMode.DRY: "dry",
@@ -32,7 +32,7 @@ MODE_HA_TO_REMO = {
 }
 
 MODE_REMO_TO_HA = {
-    "auto": HVACMode.AUTO,
+    # "auto": HVACMode.AUTO,
     "blow": HVACMode.FAN_ONLY,
     "cool": HVACMode.COOL,
     "dry": HVACMode.DRY,
